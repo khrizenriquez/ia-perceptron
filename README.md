@@ -51,8 +51,8 @@ pytest
 ### Contenedor Docker/Podman:
 
 ```
-podman build -t perceptron .
-podman run -p 8501:8501 perceptron
+podman build -t khriz-perceptron .
+podman run -d -p 8501:8501 --name khriz-perceptron khriz-perceptron
 ```
 
 ## Documentación
