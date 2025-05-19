@@ -135,7 +135,7 @@ if st.sidebar.button("Randomizar Pesos"):
     weights = np.random.randn(n_features)
     bias = np.random.randn()
     st.sidebar.success("¡Pesos inicializados aleatoriamente!")
-    st.experimental_rerun()
+    st.rerun()
 
 # Botón para entrenar el perceptrón
 if st.sidebar.button("Entrenar Perceptrón"):

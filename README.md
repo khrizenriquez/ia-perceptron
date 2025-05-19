@@ -1,4 +1,4 @@
-# Perceptrón Simple
+# Perceptrón Simple - Proyecto de IA 2025
 
 Este proyecto implementa un perceptrón simple para clasificación binaria, desarrollado como parte del Proyecto Final de Inteligencia Artificial (2025).
 
@@ -53,19 +53,9 @@ pytest
 ### Contenedor Docker/Podman:
 
 ```
-podman build -t ia-perceptron .
-podman run -d -p 8501:8501 --name ia-perceptron ia-perceptron
+podman build -t io-perceptron .
+podman run -d -p 8501:8501 --name io-perceptron io-perceptron
 ```
-
-## Documentación
-
-Para generar y visualizar la documentación:
-
-```
-mkdocs serve
-```
-
-Luego visita `http://localhost:8000` en tu navegador.
 
 ## Demo
 
