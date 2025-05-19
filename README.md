@@ -1,4 +1,4 @@
-# Perceptrón Simple - Proyecto de IA 2025
+# Perceptrón Simple
 
 Este proyecto implementa un perceptrón simple para clasificación binaria, desarrollado como parte del Proyecto Final de Inteligencia Artificial (2025).
 
