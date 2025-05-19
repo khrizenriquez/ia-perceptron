@@ -2,6 +2,8 @@
 
 Este proyecto implementa un perceptrón simple para clasificación binaria, desarrollado como parte del Proyecto Final de Inteligencia Artificial (2025).
 
+<img width="1494" alt="image" src="https://github.com/user-attachments/assets/35411d4a-e2fd-4d92-b000-dbdf536b29e2" />
+
 ## Características
 
 - Implementación de perceptrón simple para problemas de clasificación binaria
