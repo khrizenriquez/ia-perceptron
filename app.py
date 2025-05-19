@@ -82,16 +82,17 @@ def show_training_results(perceptron, epochs, error_history):
     # Mostrar frontera de decisión si tenemos 2 dimensiones
     if perceptron.weights.shape[0] == 2:
         st.subheader("Frontera de Decisión")
-        decision_boundary = perceptron.plot_decision_boundary(
-            PROBLEMS[selected_problem]["X"],
-            PROBLEMS[selected_problem]["y"]
-        )
+        decision_boundary = perceptron.plot_decision_boundary(X, y)
         st.pyplot(decision_boundary)
 
 # Panel lateral para configuración
 st.sidebar.header("Configuración del Perceptrón")
 
 # Selección del problema
+selected_X = PROBLEMS[selected_problem]["X"]
+selected_y = PROBLEMS[selected_problem]["y"]
+# Update calls to show_training_results
+# Example: show_training_results(perceptron, epochs, error_history, selected_X, selected_y)
 selected_problem = st.sidebar.selectbox(
     "Selecciona un problema:",
     list(PROBLEMS.keys())
