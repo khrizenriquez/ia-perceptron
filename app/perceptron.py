@@ -96,6 +96,7 @@ class Perceptron:
         
         # Guardar historial de pesos
         self.weights_history.append(self.weights.copy())
+        self.bias_history.append(self.bias)
         
         # Calcular tasa de error (proporción de muestras mal clasificadas)
         error_rate = error_count / len(X)
