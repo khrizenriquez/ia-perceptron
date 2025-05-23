@@ -17,6 +17,7 @@ class Perceptron:
         learning_rate (float): Learning rate for weight adjustment.
         max_epochs (int): Maximum number of training epochs.
         weights_history (List): History of weights during training.
+        bias_history (List): History of biases during training.
         error_history (List): History of errors during training.
     """
     
@@ -47,6 +48,7 @@ class Perceptron:
         
         # History for training tracking
         self.weights_history = [self.weights.copy()]
+        self.bias_history = [self.bias]
         self.error_history = []
         
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -117,6 +119,7 @@ class Perceptron:
         """
         # Reset histories
         self.weights_history = [self.weights.copy()]
+        self.bias_history = [self.bias]
         self.error_history = []
         
         # Training by epochs
