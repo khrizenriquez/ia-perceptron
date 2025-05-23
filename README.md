@@ -1,5 +1,7 @@
 # Perceptrón Simple - Proyecto de IA 2025
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/khrizenriquez/ia-perceptron)
+
 Este proyecto implementa un perceptrón simple para clasificación binaria, desarrollado como parte del Proyecto Final de Inteligencia Artificial (2025).
 
 <img width="1494" alt="image" src="https://github.com/user-attachments/assets/35411d4a-e2fd-4d92-b000-dbdf536b29e2" />
@@ -50,7 +52,7 @@ streamlit run app.py
 pytest
 ```
 
-### Contenedor Docker/Podman:
+### Contenedor Podman:
 
 ```
 podman build -t io-perceptron .
