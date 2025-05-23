@@ -349,38 +349,7 @@ def train_perceptron():
     clear_iteration_details()
     # Set URL fragment to focus on weights section after training
     st.query_params.clear()
-    # Usar JavaScript más robusto para establecer el fragmento de URL (hash) con indicadores visuales
-    st.components.v1.html(
-        """
-        <script>
-        // Agregar evento para confirmar el cambio de URL
-        document.addEventListener('DOMContentLoaded', function() {
-            // Establecer el fragmento de URL
-            window.location.hash = 'detalles-de-las-iteraciones';
-            console.log('URL actualizada a #detalles-de-las-iteraciones');
-            
-            // Manejar el scroll con retardo para asegurar que el DOM esté completamente cargado
-            setTimeout(function() {
-                const element = document.getElementById('detalles-de-las-iteraciones');
-                if (element) {
-                    element.scrollIntoView({behavior: 'smooth'});
-                    console.log('Scroll realizado a detalles-de-las-iteraciones');
-                    
-                    // Destacar temporalmente el elemento para hacerlo más visible
-                    element.style.transition = 'background-color 1s';
-                    element.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
-                    setTimeout(function() {
-                        element.style.backgroundColor = 'transparent';
-                    }, 2000);
-                } else {
-                    console.log('Elemento detalles-de-las-iteraciones no encontrado');
-                }
-            }, 1000);
-        });
-        </script>
-        """,
-        height=0
-    )
+    st.redirect("http://localhost:8501/#detalles-de-las-iteraciones")
 
 # Button to train the perceptron
 if st.sidebar.button("Entrenar Perceptrón", on_click=train_perceptron):
