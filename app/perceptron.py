@@ -96,6 +96,7 @@ class Perceptron:
         
         # Save weight history
         self.weights_history.append(self.weights.copy())
+        self.bias_history.append(self.bias)
         
         # Calculate error rate (proportion of misclassified samples)
         error_rate = error_count / len(X)
