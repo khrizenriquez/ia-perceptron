@@ -1,5 +1,5 @@
 """
-Módulo con utilidades para el proyecto del perceptrón.
+Utility module for the perceptron project.
 """
 from typing import Tuple, List, Dict, Any
 import numpy as np
@@ -13,30 +13,30 @@ def generate_random_dataset(
     noise: float = 0.1
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Genera un conjunto de datos aleatorio linealmente separable.
+    Generates a linearly separable random dataset.
     
     Args:
-        n_samples: Número de muestras a generar.
-        n_features: Número de características para cada muestra.
-        noise: Nivel de ruido en los datos.
+        n_samples: Number of samples to generate.
+        n_features: Number of features for each sample.
+        noise: Noise level in the data.
         
     Returns:
-        Tupla (X, y) con datos de entrada y etiquetas.
+        Tuple (X, y) with input data and labels.
     """
-    # Generar pesos aleatorios para definir el hiperplano separador
+    # Generate random weights to define the separator hyperplane
     weights = np.random.randn(n_features)
     bias = np.random.randn()
     
-    # Generar datos aleatorios
+    # Generate random data
     X = np.random.randn(n_samples, n_features)
     
-    # Calcular etiquetas usando el hiperplano definido por weights y bias
+    # Calculate labels using the hyperplane defined by weights and bias
     y_clean = np.where(np.dot(X, weights) + bias >= 0, 1, 0)
     
-    # Añadir ruido (cambiar algunas etiquetas aleatoriamente)
+    # Add noise (randomly change some labels)
     noise_mask = np.random.random(n_samples) < noise
     y = np.copy(y_clean)
-    y[noise_mask] = 1 - y[noise_mask]  # Invertir etiquetas con ruido
+    y[noise_mask] = 1 - y[noise_mask]  # Invert labels with noise
     
     return X, y
 
@@ -46,34 +46,34 @@ def visualize_training_history(
     weights_history: List[np.ndarray]
 ) -> Tuple[Figure, Figure]:
     """
-    Genera visualizaciones del historial de entrenamiento.
+    Generates visualizations of the training history.
     
     Args:
-        epochs: Lista de épocas.
-        error_history: Historial de errores.
-        weights_history: Historial de pesos.
+        epochs: List of epochs.
+        error_history: Error history.
+        weights_history: Weights history.
         
     Returns:
-        Tupla de figuras (error_fig, weights_fig).
+        Tuple of figures (error_fig, weights_fig).
     """
-    # Figura para la curva de error
+    # Figure for the error curve
     error_fig, ax1 = plt.subplots(figsize=(10, 5))
     ax1.plot(epochs, error_history, 'b-', marker='o')
-    ax1.set_xlabel('Época')
+    ax1.set_xlabel('Epoch')
     ax1.set_ylabel('Error')
-    ax1.set_title('Evolución del Error Durante el Entrenamiento')
+    ax1.set_title('Error Evolution During Training')
     ax1.grid(True)
     
-    # Figura para la evolución de pesos
+    # Figure for weights evolution
     weights_fig, ax2 = plt.subplots(figsize=(10, 5))
     weights_array = np.array(weights_history)
     
     for i in range(weights_array.shape[1]):
         ax2.plot(epochs, weights_array[:, i], marker='o', label=f'w{i+1}')
     
-    ax2.set_xlabel('Época')
-    ax2.set_ylabel('Valor del Peso')
-    ax2.set_title('Evolución de los Pesos Durante el Entrenamiento')
+    ax2.set_xlabel('Epoch')
+    ax2.set_ylabel('Weight Value')
+    ax2.set_title('Weight Evolution During Training')
     ax2.legend()
     ax2.grid(True)
     
@@ -84,27 +84,27 @@ def evaluate_perceptron(
     true_labels: np.ndarray
 ) -> Dict[str, Any]:
     """
-    Evalúa el rendimiento del perceptrón.
+    Evaluates the perceptron performance.
     
     Args:
-        predictions: Predicciones realizadas por el perceptrón.
-        true_labels: Etiquetas verdaderas.
+        predictions: Predictions made by the perceptron.
+        true_labels: True labels.
         
     Returns:
-        Diccionario con métricas de evaluación.
+        Dictionary with evaluation metrics.
     """
-    # Calcular métricas básicas
+    # Calculate basic metrics
     correct = np.sum(predictions == true_labels)
     total = len(true_labels)
     accuracy = correct / total
     
-    # Calcular verdaderos positivos, falsos positivos, etc.
+    # Calculate true positives, false positives, etc.
     tp = np.sum((predictions == 1) & (true_labels == 1))
     fp = np.sum((predictions == 1) & (true_labels == 0))
     tn = np.sum((predictions == 0) & (true_labels == 0))
     fn = np.sum((predictions == 0) & (true_labels == 1))
     
-    # Calcular métricas adicionales
+    # Calculate additional metrics
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0

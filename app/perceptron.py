@@ -1,5 +1,5 @@
 """
-Módulo que implementa un perceptrón simple para clasificación binaria.
+Module implementing a simple perceptron for binary classification.
 """
 from typing import List, Tuple, Optional, Union
 import numpy as np
@@ -9,15 +9,15 @@ from dataclasses import dataclass, field
 
 class Perceptron:
     """
-    Implementación de un perceptrón simple para clasificación binaria.
+    Implementation of a simple perceptron for binary classification.
     
-    Atributos:
-        weights (np.ndarray): Pesos sinápticos del perceptrón.
-        bias (float): Umbral de activación (sesgo).
-        learning_rate (float): Tasa de aprendizaje para ajuste de pesos.
-        max_epochs (int): Número máximo de épocas de entrenamiento.
-        weights_history (List): Historial de pesos durante el entrenamiento.
-        error_history (List): Historial de errores durante el entrenamiento.
+    Attributes:
+        weights (np.ndarray): Synaptic weights of the perceptron.
+        bias (float): Activation threshold (bias).
+        learning_rate (float): Learning rate for weight adjustment.
+        max_epochs (int): Maximum number of training epochs.
+        weights_history (List): History of weights during training.
+        error_history (List): History of errors during training.
     """
     
     def __init__(self, 
@@ -27,14 +27,14 @@ class Perceptron:
                  learning_rate: float = 0.1,
                  max_epochs: int = 100):
         """
-        Inicializa el perceptrón con valores configurables.
+        Initialize the perceptron with configurable values.
         
         Args:
-            input_size: Dimensión de los datos de entrada.
-            weights: Pesos iniciales (si es None, se generan aleatoriamente).
-            bias: Valor del umbral (sesgo).
-            learning_rate: Tasa de aprendizaje η.
-            max_epochs: Número máximo de épocas de entrenamiento.
+            input_size: Dimension of input data.
+            weights: Initial weights (if None, randomly generated).
+            bias: Threshold value (bias).
+            learning_rate: Learning rate η.
+            max_epochs: Maximum number of training epochs.
         """
         if weights is None:
             self.weights = np.random.randn(input_size)
@@ -45,60 +45,60 @@ class Perceptron:
         self.learning_rate = learning_rate
         self.max_epochs = max_epochs
         
-        # Historiales para seguimiento del entrenamiento
+        # History for training tracking
         self.weights_history = [self.weights.copy()]
         self.error_history = []
         
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
-        Realiza la predicción para las entradas dadas.
+        Make predictions for the given inputs.
         
         Args:
-            X: Matriz de datos de entrada, donde cada fila es una muestra.
+            X: Input data matrix, where each row is a sample.
         
         Returns:
-            Predicciones binarias (0 o 1) para cada muestra.
+            Binary predictions (0 or 1) for each sample.
         """
-        # Calcular la suma ponderada de entradas y pesos
+        # Calculate weighted sum of inputs and weights
         activation = np.dot(X, self.weights) + self.bias
         
-        # Aplicar función de activación tipo escalón
+        # Apply step activation function
         return np.where(activation >= 0, 1, 0)
     
     def train_epoch(self, X: np.ndarray, y: np.ndarray) -> float:
         """
-        Entrena el perceptrón durante una época completa.
+        Train the perceptron for a complete epoch.
         
         Args:
-            X: Matriz de datos de entrada.
-            y: Vector de etiquetas objetivo (0 o 1).
+            X: Input data matrix.
+            y: Target label vector (0 or 1).
             
         Returns:
-            Error total en la época actual.
+            Total error in the current epoch.
         """
         error_count = 0
         
-        # Iterar sobre cada muestra de entrenamiento
+        # Iterate over each training sample
         for i in range(len(X)):
-            # Obtener predicción actual
+            # Get current prediction
             prediction = self.predict(X[i].reshape(1, -1))[0]
             
-            # Calcular el error
+            # Calculate error
             error = y[i] - prediction
             
-            # Actualizar contador de errores
+            # Update error counter
             if error != 0:
                 error_count += 1
                 
-                # Actualizar pesos y bias según la regla del perceptrón
+                # Update weights and bias according to the perceptron rule
                 self.weights += self.learning_rate * error * X[i]
                 self.bias += self.learning_rate * error
         
-        # Guardar historial de pesos
+        # Save weight history
         self.weights_history.append(self.weights.copy())
         self.bias_history.append(self.bias)
         
-        # Calcular tasa de error (proporción de muestras mal clasificadas)
+        # Calculate error rate (proportion of misclassified samples)
         error_rate = error_count / len(X)
         self.error_history.append(error_rate)
         
@@ -106,66 +106,66 @@ class Perceptron:
     
     def fit(self, X: np.ndarray, y: np.ndarray) -> Tuple[List[float], int]:
         """
-        Entrena el perceptrón hasta convergencia o alcanzar max_epochs.
+        Train the perceptron until convergence or reaching max_epochs.
         
         Args:
-            X: Matriz de datos de entrada.
-            y: Vector de etiquetas objetivo (0 o 1).
+            X: Input data matrix.
+            y: Target label vector (0 or 1).
             
         Returns:
-            Tupla con (historial de errores, número de épocas realizadas).
+            Tuple with (error history, number of epochs performed).
         """
-        # Reiniciar historiales
+        # Reset histories
         self.weights_history = [self.weights.copy()]
         self.error_history = []
         
-        # Entrenamiento por épocas
+        # Training by epochs
         epoch = 0
-        error_rate = 1.0  # Inicializar con error máximo
+        error_rate = 1.0  # Initialize with maximum error
         
         while error_rate > 0 and epoch < self.max_epochs:
             error_rate = self.train_epoch(X, y)
             epoch += 1
             
-            # Si el error es cero, el perceptrón ha convergido
+            # If error is zero, perceptron has converged
             if error_rate == 0:
                 break
                 
         return self.error_history, epoch
     
     def plot_decision_boundary(self, X: np.ndarray, y: np.ndarray, 
-                              title: str = "Frontera de decisión") -> plt.Figure:
+                              title: str = "Frontera de Decisión") -> plt.Figure:
         """
-        Genera un gráfico con la frontera de decisión del perceptrón (solo para 2D).
+        Generate a plot with the perceptron's decision boundary (only for 2D).
         
         Args:
-            X: Datos de entrada (solo funciona para datos 2D).
-            y: Etiquetas reales.
-            title: Título del gráfico.
+            X: Input data (only works for 2D data).
+            y: True labels.
+            title: Plot title.
             
         Returns:
-            Figura de matplotlib con la frontera de decisión.
+            Matplotlib figure with the decision boundary.
         """
         if X.shape[1] != 2:
-            raise ValueError("La visualización de frontera solo funciona con datos 2D")
+            raise ValueError("Boundary visualization only works with 2D data")
         
-        # Crear figura
+        # Create figure
         fig, ax = plt.subplots(figsize=(10, 6))
         
-        # Graficar puntos
+        # Plot points
         ax.scatter(X[y==0, 0], X[y==0, 1], label='Clase 0', marker='o')
         ax.scatter(X[y==1, 0], X[y==1, 1], label='Clase 1', marker='x')
         
-        # Calcular frontera de decisión
+        # Calculate decision boundary
         if self.weights[1] != 0:
             x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
             y_min = (-self.bias - self.weights[0] * x_min) / self.weights[1]
             y_max = (-self.bias - self.weights[0] * x_max) / self.weights[1]
-            ax.plot([x_min, x_max], [y_min, y_max], 'k-', label='Frontera de decisión')
+            ax.plot([x_min, x_max], [y_min, y_max], 'k-', label='Frontera de Decisión')
         else:
-            # Caso de frontera vertical
+            # Case of vertical boundary
             x_boundary = -self.bias / self.weights[0]
-            ax.axvline(x=x_boundary, color='k', label='Frontera de decisión')
+            ax.axvline(x=x_boundary, color='k', label='Frontera de Decisión')
         
         ax.set_title(title)
         ax.set_xlabel('Característica 1')
