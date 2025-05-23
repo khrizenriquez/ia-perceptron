@@ -1,3 +1,3 @@
 """
-Tests para el proyecto del perceptrón simple.
+Pruebas para el proyecto del perceptrón simple.
 """ 
