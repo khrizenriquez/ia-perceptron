@@ -6,6 +6,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from app.perceptron import Perceptron
+from app.config import (
+    DEFAULT_N_FEATURES, DEFAULT_LEARNING_RATE, DEFAULT_MAX_EPOCHS,
+    DEFAULT_WEIGHT_VALUE, DEFAULT_BIAS_VALUE,
+    MIN_FEATURES, MAX_FEATURES, MIN_LEARNING_RATE, MAX_LEARNING_RATE,
+    MIN_EPOCHS, MAX_EPOCHS, STEP_EPOCHS
+)
 
 # Page configuration
 st.set_page_config(
@@ -51,9 +57,43 @@ Esta aplicación demuestra el funcionamiento de un perceptrón simple en la oper
 Puedes configurar los parámetros iniciales y visualizar el proceso de entrenamiento.
 """)
 
-# OR problem definition
-X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-y = np.array([0, 1, 1, 1])
+# Function to generate dynamic training data based on number of features
+def generate_training_data(n_features):
+    """Generate training data for n_features dimensions.
+    For features > 2, we extend the OR operation by considering it a 1 if any input is 1.
+    """
+    # Generate all possible binary combinations for n_features
+    import itertools
+    X = np.array(list(itertools.product([0, 1], repeat=n_features)))
+    
+    # For OR operation: output is 1 if any input is 1, otherwise 0
+    y = np.array([1 if np.sum(x) > 0 else 0 for x in X])
+    
+    return X, y
+
+# Sidebar for configuration
+st.sidebar.header("Configuración del Perceptrón")
+
+# Number of features/weights selection
+st.sidebar.subheader("Estructura del Perceptrón")
+n_features = st.sidebar.number_input(
+    "Número de entradas/pesos",
+    min_value=MIN_FEATURES,
+    max_value=MAX_FEATURES,
+    value=DEFAULT_N_FEATURES,
+    step=1,
+    key="n_features"
+)
+
+# Generate or update training data based on number of features
+if 'current_n_features' not in st.session_state or st.session_state.current_n_features != n_features:
+    X, y = generate_training_data(n_features)
+    st.session_state.current_n_features = n_features
+    st.session_state.X = X
+    st.session_state.y = y
+else:
+    X = st.session_state.X
+    y = st.session_state.y
 
 # Show information about OR operation with neon effect
 st.markdown('<div class="neon-text">Operación Lógica OR</div>', unsafe_allow_html=True)
@@ -113,24 +153,29 @@ def show_training_results(perceptron, epochs, error_history):
     for i in range(len(perceptron.weights_history)):
         epoch_data = {
             "Época": i,
-            "w1": perceptron.weights_history[i][0],
-            "w2": perceptron.weights_history[i][1],
-            "bias": perceptron.bias if i == 0 else perceptron.bias,
-            "Error": error_history[i-1] if i > 0 else None
         }
+        
+        # Add weights columns
+        for j in range(n_features):
+            epoch_data[f"w{j+1}"] = perceptron.weights_history[i][j]
+        
+        epoch_data["bias"] = perceptron.bias if i == 0 else perceptron.bias
+        epoch_data["Error"] = error_history[i-1] if i > 0 else None
         
         # Add predictions for each data point
         if i > 0:  # Only for epochs after initialization
             weights = perceptron.weights_history[i]
             bias = perceptron.bias
             
-            # Calculate predictions for each point
-            for j, (x_point, y_true) in enumerate(zip(X, y)):
+            # Calculate predictions for each point (limit to first 4 points to avoid overcrowding)
+            for j, (x_point, y_true) in enumerate(zip(X[:min(len(X), 4)], y[:min(len(y), 4)])):
                 activation = np.dot(x_point, weights) + bias
                 prediction = 1 if activation >= 0 else 0
                 is_correct = prediction == y_true
                 
-                epoch_data[f"Entrada ({x_point[0]},{x_point[1]})"] = f"{'✓' if is_correct else '✗'} (act={activation:.2f})"
+                # Format the input point as a string
+                x_str = ",".join([str(int(x)) for x in x_point])
+                epoch_data[f"Entrada ({x_str})"] = f"{'✓' if is_correct else '✗'} (act={activation:.2f})"
         
         iterations_data.append(epoch_data)
     
@@ -138,36 +183,30 @@ def show_training_results(perceptron, epochs, error_history):
     iterations_df = pd.DataFrame(iterations_data)
     st.dataframe(iterations_df, use_container_width=True)
 
-# Sidebar for configuration
-st.sidebar.header("Configuración del Perceptrón")
-
 # Parameter configuration
 st.sidebar.subheader("Parámetros")
 
-# Number of features
-n_features = X.shape[1]
-
-# Initialize session variables for weights and bias if they don't exist
-if 'random_weights' not in st.session_state:
-    st.session_state.random_weights = [0.0] * n_features
+# Initialize session variables for weights and bias if they don't exist or if number of features has changed
+if 'random_weights' not in st.session_state or len(st.session_state.random_weights) != n_features:
+    st.session_state.random_weights = [DEFAULT_WEIGHT_VALUE] * n_features
 if 'random_bias' not in st.session_state:
-    st.session_state.random_bias = 0.0
+    st.session_state.random_bias = DEFAULT_BIAS_VALUE
 
 # Button to randomize weights - Placed before the widgets that use these values
 if st.sidebar.button("Aleatorizar Pesos"):
-    # Generate new random weights
+    # Generate new random weights based on current number of features
     st.session_state.random_weights = np.random.randn(n_features).tolist()
     st.session_state.random_bias = float(np.random.randn())
     st.sidebar.success("¡Pesos inicializados aleatoriamente!")
     st.rerun()
 
-# Initial weights
+# Initial weights (dynamic based on n_features)
 st.sidebar.markdown("**Pesos iniciales**")
 weights = []
 for i in range(n_features):
     weights.append(st.sidebar.number_input(
         f"Peso w{i+1}", 
-        value=st.session_state.random_weights[i], 
+        value=st.session_state.random_weights[i] if i < len(st.session_state.random_weights) else DEFAULT_WEIGHT_VALUE, 
         step=0.1, 
         format="%.2f", 
         key=f"weight_{i}"
@@ -182,11 +221,23 @@ bias = st.sidebar.number_input(
     key="bias"
 )
 
-# Learning rate (default value: 0.5)
-learning_rate = st.sidebar.slider("Tasa de aprendizaje (η)", min_value=0.01, max_value=1.0, value=0.5, step=0.01)
+# Learning rate
+learning_rate = st.sidebar.slider(
+    "Tasa de aprendizaje (η)", 
+    min_value=MIN_LEARNING_RATE, 
+    max_value=MAX_LEARNING_RATE, 
+    value=DEFAULT_LEARNING_RATE, 
+    step=0.01
+)
 
 # Maximum epochs
-max_epochs = st.sidebar.slider("Máximo de épocas", min_value=10, max_value=1000, value=100, step=10)
+max_epochs = st.sidebar.slider(
+    "Máximo de épocas", 
+    min_value=MIN_EPOCHS, 
+    max_value=MAX_EPOCHS, 
+    value=DEFAULT_MAX_EPOCHS, 
+    step=STEP_EPOCHS
+)
 
 # Button to train the perceptron
 if st.sidebar.button("Entrenar Perceptrón"):
@@ -214,16 +265,38 @@ if st.sidebar.button("Entrenar Perceptrón"):
     # Show predictions
     st.subheader("Predicciones Finales")
     predictions = perceptron.predict(X)
+    
+    # Create prediction dataframe with sample data (limit rows if too many)
+    max_rows_to_show = 8  # Limit the number of rows to show in the UI
+    if len(X) > max_rows_to_show:
+        X_sample = X[:max_rows_to_show]
+        y_sample = y[:max_rows_to_show]
+        predictions_sample = predictions[:max_rows_to_show]
+        note = f"Mostrando las primeras {max_rows_to_show} predicciones de {len(X)} totales."
+    else:
+        X_sample = X
+        y_sample = y
+        predictions_sample = predictions
+        note = ""
+    
     pred_df = pd.DataFrame({
-        "Esperado": y,
-        "Predicción": predictions,
-        "¿Correcto?": y == predictions
+        "Esperado": y_sample,
+        "Predicción": predictions_sample,
+        "¿Correcto?": y_sample == predictions_sample
     })
+    
+    # Add input features as columns
+    for i in range(n_features):
+        pred_df.insert(i, f"X{i+1}", X_sample[:, i])
+    
     st.dataframe(pred_df)
+    if note:
+        st.info(note)
 
 # Additional information
 st.sidebar.markdown("---")
 st.sidebar.info("""
 **Información:**
 - El perceptrón se detendrá cuando el error sea 0 o se alcance el máximo de épocas.
+- Para más de 2 entradas, la operación OR se extiende (1 si al menos una entrada es 1).
 """)
