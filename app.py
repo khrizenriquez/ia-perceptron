@@ -17,38 +17,19 @@ st.set_page_config(
 # Título y descripción
 st.title("Perceptrón Simple - Demostración Interactiva")
 st.markdown("""
-Esta aplicación demuestra el funcionamiento de un perceptrón simple en problemas de clasificación binaria.
+Esta aplicación demuestra el funcionamiento de un perceptrón simple en la operación lógica OR.
 Puedes configurar los parámetros iniciales y visualizar el proceso de entrenamiento.
 """)
 
-# Definición de problemas predefinidos
-PROBLEMS = {
-    "AND": {
-        "X": np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
-        "y": np.array([0, 0, 0, 1]),
-        "description": "Operación lógica AND: Solo es 1 cuando ambas entradas son 1"
-    },
-    "OR": {
-        "X": np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
-        "y": np.array([0, 1, 1, 1]),
-        "description": "Operación lógica OR: Es 1 cuando al menos una entrada es 1"
-    },
-    "NAND": {
-        "X": np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
-        "y": np.array([1, 1, 1, 0]),
-        "description": "Operación lógica NAND: Es 0 solo cuando ambas entradas son 1"
-    },
-    "XOR": {
-        "X": np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
-        "y": np.array([0, 1, 1, 0]),
-        "description": "Operación lógica XOR: Es 1 cuando las entradas son diferentes (no linealmente separable)"
-    },
-    "Personalizado": {
-        "X": None,
-        "y": None,
-        "description": "Define tu propio problema de clasificación binaria"
-    }
-}
+# Definición del problema OR
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([0, 1, 1, 1])
+
+# Mostrar información sobre la operación OR
+st.info("""
+### Operación lógica OR
+Es 1 cuando al menos una de las entradas es 1.
+""")
 
 # Función para mostrar tablas de datos
 def show_data_table(X, y):
@@ -56,6 +37,9 @@ def show_data_table(X, y):
     data["y"] = y
     st.write("Datos de entrenamiento:")
     st.dataframe(data)
+
+# Mostrar datos de entrenamiento
+show_data_table(X, y)
 
 # Función para mostrar resultados de entrenamiento
 def show_training_results(perceptron, epochs, error_history):
@@ -83,31 +67,12 @@ def show_training_results(perceptron, epochs, error_history):
     if perceptron.weights.shape[0] == 2:
         st.subheader("Frontera de Decisión")
         decision_boundary = perceptron.plot_decision_boundary(
-            PROBLEMS[selected_problem]["X"],
-            PROBLEMS[selected_problem]["y"]
+            X, y, title="Frontera de decisión - Operación OR"
         )
         st.pyplot(decision_boundary)
 
 # Panel lateral para configuración
 st.sidebar.header("Configuración del Perceptrón")
-
-# Selección del problema
-selected_problem = st.sidebar.selectbox(
-    "Selecciona un problema:",
-    list(PROBLEMS.keys())
-)
-
-# Mostrar descripción del problema
-st.sidebar.markdown(f"**{PROBLEMS[selected_problem]['description']}**")
-
-# Si se selecciona un problema predefinido, mostrar los datos
-if selected_problem != "Personalizado":
-    X = PROBLEMS[selected_problem]["X"]
-    y = PROBLEMS[selected_problem]["y"]
-    show_data_table(X, y)
-else:
-    st.warning("La opción de problema personalizado está en desarrollo. Por favor, selecciona uno predefinido.")
-    st.stop()
 
 # Configuración de parámetros
 st.sidebar.subheader("Parámetros")
@@ -175,5 +140,4 @@ st.sidebar.markdown("---")
 st.sidebar.info("""
 **Información:**
 - El perceptrón se detendrá cuando el error sea 0 o se alcance el máximo de épocas.
-- Para problemas no linealmente separables (como XOR), el perceptrón no convergerá.
-""") 
+""")
