@@ -349,7 +349,6 @@ def train_perceptron():
     clear_iteration_details()
     # Set URL fragment to focus on weights section after training
     st.query_params.clear()
-    st.redirect("http://localhost:8501/#detalles-de-las-iteraciones")
 
 # Button to train the perceptron
 if st.sidebar.button("Entrenar Perceptrón", on_click=train_perceptron):

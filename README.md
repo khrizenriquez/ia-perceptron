@@ -63,6 +63,8 @@ podman run -d -p 8501:8501 --name io-perceptron io-perceptron
 
 Una demostración del proyecto está disponible en YouTube: [<<<AQUÍ_URL_VIDEO>>>](<<<AQUÍ_URL_VIDEO>>>)
 
+La aplicación está disponible en línea a través de Streamlit Cloud: [https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/](https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/)
+
 ## Licencia
 
 Este proyecto está bajo la Licencia MIT. 
