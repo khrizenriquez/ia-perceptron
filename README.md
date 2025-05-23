@@ -65,10 +65,6 @@ Una demostración del proyecto está disponible en YouTube: [<<<AQUÍ_URL_VIDEO>
 
 La aplicación está disponible en línea a través de Streamlit Cloud: [https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/](https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/)
 
-## Licencia
-
-Este proyecto está bajo la Licencia MIT. 
-
 ## Entorno virtual (opcional)
 
 Si prefieres ejecutar la aplicación localmente sin contenedores:
@@ -132,9 +128,7 @@ Después de cualquiera de estos métodos, la aplicación estará disponible en [
    - Ver la evolución de los pesos y bias
    - Explorar la curva de error
    - Observar la frontera de decisión (solo para 2 dimensiones)
-   - Editar los valores en la tabla de "Detalles de las Iteraciones"
-   - Usar "Recalcular Factores" para ver el efecto de tus cambios
-   - Probar "Factores Aleatorios" para generar pesos aleatorios
+   - Explorar los detalles de cada iteración en la tabla "Detalles de las Iteraciones"
 
 ## Estructura del proyecto
 
