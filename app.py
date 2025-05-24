@@ -5,6 +5,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import io
+import base64
 from app.perceptron import Perceptron
 from app.config import (
     DEFAULT_N_FEATURES, DEFAULT_LEARNING_RATE, DEFAULT_MAX_EPOCHS,
@@ -20,7 +22,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for neon effect
+# Custom CSS for neon effect and responsive design
 st.markdown("""
 <style>
 .neon-text {
@@ -50,6 +52,31 @@ st.markdown("""
 
 .stButton>button {
     width: 100%;
+}
+
+/* Responsive styling for perceptron visualization */
+@media (min-width: 1200px) {
+    /* Desktop */
+    .perceptron-model-container {
+        width: 40%;
+        margin: 0 auto;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    /* Tablet */
+    .perceptron-model-container {
+        width: 60%;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 767px) {
+    /* Mobile */
+    .perceptron-model-container {
+        width: 90%;
+        margin: 0 auto;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -166,15 +193,15 @@ def show_training_results(perceptron, epochs, error_history):
         weights_df = pd.DataFrame(perceptron.weights_history)
         weights_df.columns = [f"w{i+1}" for i in range(weights_df.shape[1])]
         
-        # Asegurar que la longitud de la lista de bias coincida con la longitud del índice
-        # El error ocurre porque el perceptrón guarda un valor de bias inicial más los valores de cada época
-        # pero epochs solo cuenta las épocas de entrenamiento, no incluye la inicialización
+        # Ensure that bias list length matches the index length
+        # The error occurs because the perceptron saves an initial bias value plus values for each epoch
+        # but epochs only counts training epochs, not including initialization
         bias_values = perceptron.bias_history
         if len(bias_values) < len(weights_df):
-            # Si faltan valores de bias, repetir el último valor
+            # If bias values are missing, repeat the last value
             bias_values = bias_values + [bias_values[-1]] * (len(weights_df) - len(bias_values))
         elif len(bias_values) > len(weights_df):
-            # Si hay demasiados valores de bias, recortar
+            # If there are too many bias values, trim
             bias_values = bias_values[:len(weights_df)]
         
         weights_df["bias"] = bias_values
@@ -291,7 +318,7 @@ def show_training_results(perceptron, epochs, error_history):
     if note:
         st.info(note)
     
-    # Nueva sección para visualizar las predicciones por iteración junto con los detalles de las iteraciones
+    # New section to visualize predictions by iteration along with iteration details
     st.markdown('<div id="predicciones-detalles-iteracion"></div>', unsafe_allow_html=True)
     st.subheader("Visualización Detallada por Iteración")
     st.markdown("""
@@ -403,23 +430,23 @@ def show_training_results(perceptron, epochs, error_history):
                 st.markdown("##### Fórmula del Perceptrón")
                 st.code(formula)
 
-    # Añadir visualización gráfica del perceptrón
+    # Add perceptron graphical visualization
     st.subheader("Visualización Gráfica del Perceptrón")
     
-    # Crear una figura para la visualización del perceptrón con estilo más parecido al diagrama de referencia
+    # Create a figure for the perceptron visualization with a style similar to the reference diagram
     fig, ax = plt.subplots(figsize=(8, 10))
     
-    # Configuración general
+    # General configuration
     ax.axis('off')
     ax.set_xlim(0, 10)
     ax.set_ylim(0, 12)
     
-    # Definir ubicaciones para los componentes
+    # Define locations for the components
     box_width = 3
     box_height = 1
     margin = 0.5
     
-    # Posiciones de cajas
+    # Box positions
     x_center = 5
     y_input1 = 10
     y_input2 = 10
@@ -432,23 +459,23 @@ def show_training_results(perceptron, epochs, error_history):
     y_activation = 4
     y_output = 1
     
-    # Dibujar cajas de entrada
+    # Draw input boxes
     input1_rect = plt.Rectangle((x_input1 - box_width/2, y_input1 - box_height/2), box_width, box_height, 
-                              fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+                               fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
     ax.add_patch(input1_rect)
     ax.text(x_input1, y_input1, f"Entrada X₁", ha='center', va='center', fontsize=12)
     
     input2_rect = plt.Rectangle((x_input2 - box_width/2, y_input2 - box_height/2), box_width, box_height, 
-                              fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+                               fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
     ax.add_patch(input2_rect)
     ax.text(x_input2, y_input2, f"Entrada X₂", ha='center', va='center', fontsize=12)
     
     bias_rect = plt.Rectangle((x_bias - box_width/2, y_bias - box_height/2), box_width, box_height, 
-                            fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+                             fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
     ax.add_patch(bias_rect)
     ax.text(x_bias, y_bias, f"Umbral b", ha='center', va='center', fontsize=12)
     
-    # Dibujar caja de sumatorio
+    # Draw summation box
     sum_rect = plt.Rectangle((x_center - box_width/2, y_summation - box_height/2), box_width, box_height, 
                            fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
     ax.add_patch(sum_rect)
@@ -456,24 +483,24 @@ def show_training_results(perceptron, epochs, error_history):
     formula = r"$\Sigma(w_ix_i) + b$"
     ax.text(x_center, y_summation - 0.2, formula, ha='center', va='center', fontsize=10)
     
-    # Dibujar caja de función de activación
+    # Draw activation function box
     act_rect = plt.Rectangle((x_center - box_width/2, y_activation - box_height/2), box_width, box_height, 
                            fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
     ax.add_patch(act_rect)
     ax.text(x_center, y_activation + 0.2, "Función de", ha='center', va='center', fontsize=12)
     ax.text(x_center, y_activation - 0.2, "Activación", ha='center', va='center', fontsize=12)
     
-    # Dibujar caja de salida
+    # Draw output box
     out_rect = plt.Rectangle((x_center - box_width/2, y_output - box_height/2), box_width, box_height, 
                            fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
     ax.add_patch(out_rect)
     ax.text(x_center, y_output + 0.2, "Salida", ha='center', va='center', fontsize=12)
     ax.text(x_center, y_output - 0.2, "(0 o 1)", ha='center', va='center', fontsize=12)
     
-    # Conectar los componentes con flechas
+    # Connect components with arrows
     arrow_props = dict(arrowstyle='->', linewidth=1.5, color='gray')
     
-    # Conectar entradas al sumatorio
+    # Connect inputs to summation
     ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
                xytext=(x_input1, y_input1 + box_height/2 + margin/4),
                arrowprops=arrow_props)
@@ -492,26 +519,33 @@ def show_training_results(perceptron, epochs, error_history):
     ax.text((x_center + x_bias)/2 + 0.5, (y_summation + y_bias)/2, f"b={perceptron.bias:.2f}", 
            fontsize=10, ha='center', va='center')
     
-    # Conectar sumatorio a función de activación
+    # Connect summation to activation function
     ax.annotate("", xy=(x_center, y_activation - box_height/2 - margin/4), 
                xytext=(x_center, y_summation + box_height/2 + margin/4),
                arrowprops=arrow_props)
     
-    # Conectar función de activación a salida
+    # Connect activation function to output
     ax.annotate("", xy=(x_center, y_output - box_height/2 - margin/4), 
                xytext=(x_center, y_activation + box_height/2 + margin/4),
                arrowprops=arrow_props)
     
-    # Añadir título con el modelo perceptrón
+    # Add perceptron model title
     ax.set_title("Modelo del Perceptrón", fontsize=16, pad=20)
     
-    # Mostrar la fórmula final del perceptrón debajo del diagrama
+    # Show the final perceptron formula below the diagram
     formula_text = f"y = 1 si ({perceptron.weights[0]:.2f}·x₁ + {perceptron.weights[1]:.2f}·x₂ + {perceptron.bias:.2f}) ≥ 0, sino 0"
     fig.text(0.5, 0.05, formula_text, ha='center', fontsize=12, 
             bbox=dict(facecolor='lightyellow', alpha=0.9, boxstyle='round,pad=0.5'))
     
-    # Mostrar la figura en Streamlit
-    st.pyplot(fig)
+    # Convert the matplotlib figure to an image for HTML embedding with responsive class
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format='png', bbox_inches='tight')
+    buffer.seek(0)
+    img_str = base64.b64encode(buffer.read()).decode()
+    
+    # Display the figure using HTML for responsiveness
+    st.markdown(f'<div class="perceptron-model-container"><img src="data:image/png;base64,{img_str}" style="width:100%;"></div>', unsafe_allow_html=True)
+    plt.close(fig)  # Close the figure to free memory
 
 # Parameter configuration
 st.sidebar.subheader("Parámetros")
@@ -592,7 +626,7 @@ def train_perceptron():
     # Set URL fragment to focus on weights section after training
     st.query_params.clear()
     
-    # Actualizar el criterio de parada en la configuración
+    # Update the stopping criterion in the configuration
     global STOP_ON_ALL_CORRECT
     STOP_ON_ALL_CORRECT = stop_criterion
 
