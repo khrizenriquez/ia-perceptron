@@ -5,6 +5,7 @@ from typing import List, Tuple, Optional, Union
 import numpy as np
 import matplotlib.pyplot as plt
 from dataclasses import dataclass, field
+from app.config import STOP_ON_ALL_CORRECT
 
 
 class Perceptron:
@@ -108,32 +109,47 @@ class Perceptron:
     
     def fit(self, X: np.ndarray, y: np.ndarray) -> Tuple[List[float], int]:
         """
-        Train the perceptron until convergence or reaching max_epochs.
+        Train the perceptron on the given data.
         
         Args:
-            X: Input data matrix.
-            y: Target label vector (0 or 1).
+            X: Input data matrix of shape (samples, features)
+            y: Target values of shape (samples,)
             
         Returns:
-            Tuple with (error history, number of epochs performed).
+            Tuple containing:
+                - List of error rates for each epoch
+                - Number of epochs trained
         """
-        # Reset histories
-        self.weights_history = [self.weights.copy()]
-        self.bias_history = [self.bias]
+        # Initialize history lists if they don't exist
+        if not hasattr(self, 'weights_history'):
+            self.weights_history = [self.weights.copy()]
+        if not hasattr(self, 'bias_history'):
+            self.bias_history = [self.bias]
+            
+        # Reset error history
         self.error_history = []
         
-        # Training by epochs
+        # Train for up to max_epochs
         epoch = 0
-        error_rate = 1.0  # Initialize with maximum error
-        
-        while error_rate > 0 and epoch < self.max_epochs:
+        while epoch < self.max_epochs:
+            # Train one epoch and get error rate
             error_rate = self.train_epoch(X, y)
+            self.error_history.append(error_rate)
+            
+            # Determine if training should stop
+            if STOP_ON_ALL_CORRECT:
+                # Check if all predictions are correct
+                predictions = self.predict(X)
+                all_correct = np.array_equal(predictions, y)
+                if all_correct:
+                    break
+            else:
+                # Stop if error rate is 0
+                if error_rate == 0:
+                    break
+                
             epoch += 1
             
-            # If error is zero, perceptron has converged
-            if error_rate == 0:
-                break
-                
         return self.error_history, epoch
     
     def plot_decision_boundary(self, X: np.ndarray, y: np.ndarray, 

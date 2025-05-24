@@ -10,7 +10,7 @@ from app.config import (
     DEFAULT_N_FEATURES, DEFAULT_LEARNING_RATE, DEFAULT_MAX_EPOCHS,
     DEFAULT_WEIGHT_VALUE, DEFAULT_BIAS_VALUE,
     MIN_FEATURES, MAX_FEATURES, MIN_LEARNING_RATE, MAX_LEARNING_RATE,
-    MIN_EPOCHS, MAX_EPOCHS, STEP_EPOCHS
+    MIN_EPOCHS, MAX_EPOCHS, STEP_EPOCHS, STOP_ON_ALL_CORRECT
 )
 
 # Page configuration
@@ -165,7 +165,19 @@ def show_training_results(perceptron, epochs, error_history):
         st.subheader("Evolución de Pesos")
         weights_df = pd.DataFrame(perceptron.weights_history)
         weights_df.columns = [f"w{i+1}" for i in range(weights_df.shape[1])]
-        weights_df["bias"] = [perceptron.bias] + [perceptron.bias] * epochs
+        
+        # Asegurar que la longitud de la lista de bias coincida con la longitud del índice
+        # El error ocurre porque el perceptrón guarda un valor de bias inicial más los valores de cada época
+        # pero epochs solo cuenta las épocas de entrenamiento, no incluye la inicialización
+        bias_values = perceptron.bias_history
+        if len(bias_values) < len(weights_df):
+            # Si faltan valores de bias, repetir el último valor
+            bias_values = bias_values + [bias_values[-1]] * (len(weights_df) - len(bias_values))
+        elif len(bias_values) > len(weights_df):
+            # Si hay demasiados valores de bias, recortar
+            bias_values = bias_values[:len(weights_df)]
+        
+        weights_df["bias"] = bias_values
         weights_df.index.name = "Época"
         st.dataframe(weights_df)
     
@@ -278,6 +290,228 @@ def show_training_results(perceptron, epochs, error_history):
     st.dataframe(pred_df)
     if note:
         st.info(note)
+    
+    # Añadir visualización gráfica del perceptrón
+    st.subheader("Visualización Gráfica del Perceptrón")
+    
+    # Crear una figura para la visualización del perceptrón con estilo más parecido al diagrama de referencia
+    fig, ax = plt.subplots(figsize=(8, 10))
+    
+    # Configuración general
+    ax.axis('off')
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 12)
+    
+    # Definir ubicaciones para los componentes
+    box_width = 3
+    box_height = 1
+    margin = 0.5
+    
+    # Posiciones de cajas
+    x_center = 5
+    y_input1 = 10
+    y_input2 = 10
+    y_bias = 10
+    x_input1 = 2
+    x_input2 = 5
+    x_bias = 8
+    
+    y_summation = 7
+    y_activation = 4
+    y_output = 1
+    
+    # Dibujar cajas de entrada
+    input1_rect = plt.Rectangle((x_input1 - box_width/2, y_input1 - box_height/2), box_width, box_height, 
+                              fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(input1_rect)
+    ax.text(x_input1, y_input1, f"Entrada X₁", ha='center', va='center', fontsize=12)
+    
+    input2_rect = plt.Rectangle((x_input2 - box_width/2, y_input2 - box_height/2), box_width, box_height, 
+                              fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(input2_rect)
+    ax.text(x_input2, y_input2, f"Entrada X₂", ha='center', va='center', fontsize=12)
+    
+    bias_rect = plt.Rectangle((x_bias - box_width/2, y_bias - box_height/2), box_width, box_height, 
+                            fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(bias_rect)
+    ax.text(x_bias, y_bias, f"Umbral b", ha='center', va='center', fontsize=12)
+    
+    # Dibujar caja de sumatorio
+    sum_rect = plt.Rectangle((x_center - box_width/2, y_summation - box_height/2), box_width, box_height, 
+                           fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(sum_rect)
+    ax.text(x_center, y_summation + 0.2, " ", ha='center', va='center', fontsize=12)
+    formula = r"$\Sigma(w_ix_i) + b$"
+    ax.text(x_center, y_summation - 0.2, formula, ha='center', va='center', fontsize=10)
+    
+    # Dibujar caja de función de activación
+    act_rect = plt.Rectangle((x_center - box_width/2, y_activation - box_height/2), box_width, box_height, 
+                           fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(act_rect)
+    ax.text(x_center, y_activation + 0.2, "Función de", ha='center', va='center', fontsize=12)
+    ax.text(x_center, y_activation - 0.2, "Activación", ha='center', va='center', fontsize=12)
+    
+    # Dibujar caja de salida
+    out_rect = plt.Rectangle((x_center - box_width/2, y_output - box_height/2), box_width, box_height, 
+                           fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(out_rect)
+    ax.text(x_center, y_output + 0.2, "Salida", ha='center', va='center', fontsize=12)
+    ax.text(x_center, y_output - 0.2, "(0 o 1)", ha='center', va='center', fontsize=12)
+    
+    # Conectar los componentes con flechas
+    arrow_props = dict(arrowstyle='->', linewidth=1.5, color='gray')
+    
+    # Conectar entradas al sumatorio
+    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
+               xytext=(x_input1, y_input1 + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    ax.text((x_center + x_input1)/2 - 0.5, (y_summation + y_input1)/2, f"w₁={perceptron.weights[0]:.2f}", 
+           fontsize=10, ha='center', va='center')
+    
+    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
+               xytext=(x_input2, y_input2 + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    ax.text((x_center + x_input2)/2, (y_summation + y_input2)/2, f"w₂={perceptron.weights[1]:.2f}", 
+           fontsize=10, ha='center', va='center')
+    
+    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
+               xytext=(x_bias, y_bias + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    ax.text((x_center + x_bias)/2 + 0.5, (y_summation + y_bias)/2, f"b={perceptron.bias:.2f}", 
+           fontsize=10, ha='center', va='center')
+    
+    # Conectar sumatorio a función de activación
+    ax.annotate("", xy=(x_center, y_activation - box_height/2 - margin/4), 
+               xytext=(x_center, y_summation + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    
+    # Conectar función de activación a salida
+    ax.annotate("", xy=(x_center, y_output - box_height/2 - margin/4), 
+               xytext=(x_center, y_activation + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    
+    # Añadir título con el modelo perceptrón
+    ax.set_title("Modelo del Perceptrón", fontsize=16, pad=20)
+    
+    # Mostrar la fórmula final del perceptrón debajo del diagrama
+    formula_text = f"y = 1 si ({perceptron.weights[0]:.2f}·x₁ + {perceptron.weights[1]:.2f}·x₂ + {perceptron.bias:.2f}) ≥ 0, sino 0"
+    fig.text(0.5, 0.05, formula_text, ha='center', fontsize=12, 
+            bbox=dict(facecolor='lightyellow', alpha=0.9, boxstyle='round,pad=0.5'))
+    
+    # Mostrar la figura en Streamlit
+    st.pyplot(fig)
+    
+    # Nueva sección para visualizar las predicciones por iteración junto con los detalles de las iteraciones
+    st.markdown('<div id="predicciones-detalles-iteracion"></div>', unsafe_allow_html=True)
+    st.subheader("Visualización Detallada por Iteración")
+    st.markdown("""
+    Esta sección muestra la evolución de las predicciones y los detalles técnicos (pesos, bias, error) para cada iteración.
+    """)
+    
+    # Crear un contenedor para mostrar los detalles iteración por iteración
+    for iter_idx in range(1, len(perceptron.weights_history)):
+        # Crear un expander para cada iteración
+        with st.expander(f"Iteración {iter_idx}", expanded=iter_idx == len(perceptron.weights_history)-1):
+            # Crear dos columnas para mostrar predicciones y detalles lado a lado
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("##### Predicciones")
+                
+                # Calcular las predicciones para esta iteración
+                weights = perceptron.weights_history[iter_idx]
+                bias = perceptron.bias_history[iter_idx]
+                
+                # Crear un DataFrame para las predicciones de esta iteración
+                iter_preds = []
+                for j, (x_point, y_true) in enumerate(zip(X_sample, y_sample)):
+                    activation = np.dot(x_point, weights) + bias
+                    prediction = 1 if activation >= 0 else 0
+                    is_correct = prediction == y_true
+                    
+                    row_data = {"Esperado": y_true, "Predicción": prediction, "Correcto": is_correct}
+                    for k in range(n_features):
+                        row_data[f"X{k+1}"] = x_point[k]
+                    
+                    iter_preds.append(row_data)
+                
+                iter_df = pd.DataFrame(iter_preds)
+                
+                # Estilizar el DataFrame para resaltar resultados
+                def highlight_correct(val):
+                    if val is True:
+                        return 'background-color: #d4edda'
+                    elif val is False:
+                        return 'background-color: #f8d7da'
+                    return ''
+                
+                styled_df = iter_df.style.applymap(highlight_correct, subset=['Correcto'])
+                
+                # Mostrar la tabla de predicciones
+                st.dataframe(styled_df, use_container_width=True)
+                
+                # Mostrar información de error para esta iteración
+                error_value = perceptron.error_history[iter_idx-1] if iter_idx-1 < len(perceptron.error_history) else None
+                if error_value is not None:
+                    st.metric("Tasa de Error", f"{error_value:.4f}")
+            
+            with col2:
+                st.markdown("##### Detalles Técnicos")
+                
+                # Crear un DataFrame con los detalles de esta iteración
+                details_data = {
+                    "Parámetro": ["Época"] + [f"Peso {i+1}" for i in range(n_features)] + ["Bias"]
+                }
+                
+                # Agregar los valores
+                values = [iter_idx]
+                for w in weights:
+                    values.append(f"{w:.4f}")
+                values.append(f"{bias:.4f}")
+                
+                details_data["Valor"] = values
+                
+                # Si no es la primera iteración, agregar cambios respecto a la iteración anterior
+                if iter_idx > 1:
+                    prev_weights = perceptron.weights_history[iter_idx-1]
+                    prev_bias = perceptron.bias_history[iter_idx-1]
+                    
+                    changes = ["-"]  # No hay cambio para la época
+                    for i, (curr, prev) in enumerate(zip(weights, prev_weights)):
+                        change = curr - prev
+                        changes.append(f"{change:+.4f}")
+                    
+                    bias_change = bias - prev_bias
+                    changes.append(f"{bias_change:+.4f}")
+                    
+                    details_data["Cambio"] = changes
+                
+                # Mostrar la tabla de detalles
+                details_df = pd.DataFrame(details_data)
+                st.dataframe(details_df, use_container_width=True)
+                
+                # Mostrar información sobre la convergencia
+                if iter_idx == len(perceptron.weights_history) - 1:
+                    all_correct = all(pred == true for pred, true in zip(perceptron.predict(X), y))
+                    if all_correct:
+                        st.success("¡Convergencia alcanzada! Todas las predicciones son correctas.")
+                    else:
+                        incorrect_count = sum(pred != true for pred, true in zip(perceptron.predict(X), y))
+                        st.warning(f"No se alcanzó convergencia completa. {incorrect_count} predicciones incorrectas.")
+                        
+                # Mostrar fórmula del perceptrón para esta iteración
+                formula = f"y = 1 si ("
+                for i, w in enumerate(weights):
+                    if i > 0:
+                        formula += " + " if w >= 0 else " - "
+                    else:
+                        formula += "-" if w < 0 else ""
+                    formula += f"{abs(w):.4f} × X{i+1}"
+                formula += f" + {bias:.4f}" if bias >= 0 else f" - {abs(bias):.4f}"
+                formula += ") ≥ 0, sino y = 0"
+                
+                st.markdown("##### Fórmula del Perceptrón")
+                st.code(formula)
 
 # Parameter configuration
 st.sidebar.subheader("Parámetros")
@@ -339,6 +573,14 @@ max_epochs = st.sidebar.slider(
     step=STEP_EPOCHS
 )
 
+# Opción para configurar el criterio de parada
+stop_criterion = st.sidebar.checkbox(
+    "Detener cuando todas las predicciones sean correctas", 
+    value=STOP_ON_ALL_CORRECT,
+    help="Si está marcado, el entrenamiento se detiene cuando todas las predicciones son correctas. "
+         "Si no está marcado, se detiene cuando la tasa de error es 0."
+)
+
 # Clear iteration details when training parameters change
 def clear_iteration_details():
     if 'iteration_details' in st.session_state:
@@ -349,6 +591,10 @@ def train_perceptron():
     clear_iteration_details()
     # Set URL fragment to focus on weights section after training
     st.query_params.clear()
+    
+    # Actualizar el criterio de parada en la configuración
+    global STOP_ON_ALL_CORRECT
+    STOP_ON_ALL_CORRECT = stop_criterion
 
 # Button to train the perceptron
 if st.sidebar.button("Entrenar Perceptrón", on_click=train_perceptron):
@@ -377,7 +623,6 @@ if st.sidebar.button("Entrenar Perceptrón", on_click=train_perceptron):
 st.sidebar.markdown("---")
 st.sidebar.info("""
 **Información:**
-- El perceptrón se detendrá cuando el error sea 0 o se alcance el máximo de épocas.
 - Para más de 2 entradas, la operación OR se extiende (1 si al menos una entrada es 1).
-- Puedes editar los valores en la tabla "Detalles de las Iteraciones" y usar los botones para recalcular.
+- En la sección "Visualización de Predicciones por Iteración" puedes ver cómo evoluciona el aprendizaje en cada época.
 """)
