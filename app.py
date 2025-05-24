@@ -291,116 +291,6 @@ def show_training_results(perceptron, epochs, error_history):
     if note:
         st.info(note)
     
-    # Añadir visualización gráfica del perceptrón
-    st.subheader("Visualización Gráfica del Perceptrón")
-    
-    # Crear una figura para la visualización del perceptrón con estilo más parecido al diagrama de referencia
-    fig, ax = plt.subplots(figsize=(8, 10))
-    
-    # Configuración general
-    ax.axis('off')
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0, 12)
-    
-    # Definir ubicaciones para los componentes
-    box_width = 3
-    box_height = 1
-    margin = 0.5
-    
-    # Posiciones de cajas
-    x_center = 5
-    y_input1 = 10
-    y_input2 = 10
-    y_bias = 10
-    x_input1 = 2
-    x_input2 = 5
-    x_bias = 8
-    
-    y_summation = 7
-    y_activation = 4
-    y_output = 1
-    
-    # Dibujar cajas de entrada
-    input1_rect = plt.Rectangle((x_input1 - box_width/2, y_input1 - box_height/2), box_width, box_height, 
-                              fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
-    ax.add_patch(input1_rect)
-    ax.text(x_input1, y_input1, f"Entrada X₁", ha='center', va='center', fontsize=12)
-    
-    input2_rect = plt.Rectangle((x_input2 - box_width/2, y_input2 - box_height/2), box_width, box_height, 
-                              fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
-    ax.add_patch(input2_rect)
-    ax.text(x_input2, y_input2, f"Entrada X₂", ha='center', va='center', fontsize=12)
-    
-    bias_rect = plt.Rectangle((x_bias - box_width/2, y_bias - box_height/2), box_width, box_height, 
-                            fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
-    ax.add_patch(bias_rect)
-    ax.text(x_bias, y_bias, f"Umbral b", ha='center', va='center', fontsize=12)
-    
-    # Dibujar caja de sumatorio
-    sum_rect = plt.Rectangle((x_center - box_width/2, y_summation - box_height/2), box_width, box_height, 
-                           fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
-    ax.add_patch(sum_rect)
-    ax.text(x_center, y_summation + 0.2, " ", ha='center', va='center', fontsize=12)
-    formula = r"$\Sigma(w_ix_i) + b$"
-    ax.text(x_center, y_summation - 0.2, formula, ha='center', va='center', fontsize=10)
-    
-    # Dibujar caja de función de activación
-    act_rect = plt.Rectangle((x_center - box_width/2, y_activation - box_height/2), box_width, box_height, 
-                           fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
-    ax.add_patch(act_rect)
-    ax.text(x_center, y_activation + 0.2, "Función de", ha='center', va='center', fontsize=12)
-    ax.text(x_center, y_activation - 0.2, "Activación", ha='center', va='center', fontsize=12)
-    
-    # Dibujar caja de salida
-    out_rect = plt.Rectangle((x_center - box_width/2, y_output - box_height/2), box_width, box_height, 
-                           fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
-    ax.add_patch(out_rect)
-    ax.text(x_center, y_output + 0.2, "Salida", ha='center', va='center', fontsize=12)
-    ax.text(x_center, y_output - 0.2, "(0 o 1)", ha='center', va='center', fontsize=12)
-    
-    # Conectar los componentes con flechas
-    arrow_props = dict(arrowstyle='->', linewidth=1.5, color='gray')
-    
-    # Conectar entradas al sumatorio
-    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
-               xytext=(x_input1, y_input1 + box_height/2 + margin/4),
-               arrowprops=arrow_props)
-    ax.text((x_center + x_input1)/2 - 0.5, (y_summation + y_input1)/2, f"w₁={perceptron.weights[0]:.2f}", 
-           fontsize=10, ha='center', va='center')
-    
-    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
-               xytext=(x_input2, y_input2 + box_height/2 + margin/4),
-               arrowprops=arrow_props)
-    ax.text((x_center + x_input2)/2, (y_summation + y_input2)/2, f"w₂={perceptron.weights[1]:.2f}", 
-           fontsize=10, ha='center', va='center')
-    
-    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
-               xytext=(x_bias, y_bias + box_height/2 + margin/4),
-               arrowprops=arrow_props)
-    ax.text((x_center + x_bias)/2 + 0.5, (y_summation + y_bias)/2, f"b={perceptron.bias:.2f}", 
-           fontsize=10, ha='center', va='center')
-    
-    # Conectar sumatorio a función de activación
-    ax.annotate("", xy=(x_center, y_activation - box_height/2 - margin/4), 
-               xytext=(x_center, y_summation + box_height/2 + margin/4),
-               arrowprops=arrow_props)
-    
-    # Conectar función de activación a salida
-    ax.annotate("", xy=(x_center, y_output - box_height/2 - margin/4), 
-               xytext=(x_center, y_activation + box_height/2 + margin/4),
-               arrowprops=arrow_props)
-    
-    # Añadir título con el modelo perceptrón
-    ax.set_title("Modelo del Perceptrón", fontsize=16, pad=20)
-    
-    # Mostrar la fórmula final del perceptrón debajo del diagrama
-    formula_text = f"y = 1 si ({perceptron.weights[0]:.2f}·x₁ + {perceptron.weights[1]:.2f}·x₂ + {perceptron.bias:.2f}) ≥ 0, sino 0"
-    fig.text(0.5, 0.05, formula_text, ha='center', fontsize=12, 
-            bbox=dict(facecolor='lightyellow', alpha=0.9, boxstyle='round,pad=0.5'))
-    
-    # Mostrar la figura en Streamlit
-    st.pyplot(fig)
-    
     # Nueva sección para visualizar las predicciones por iteración junto con los detalles de las iteraciones
     st.markdown('<div id="predicciones-detalles-iteracion"></div>', unsafe_allow_html=True)
     st.subheader("Visualización Detallada por Iteración")
@@ -512,6 +402,116 @@ def show_training_results(perceptron, epochs, error_history):
                 
                 st.markdown("##### Fórmula del Perceptrón")
                 st.code(formula)
+
+    # Añadir visualización gráfica del perceptrón
+    st.subheader("Visualización Gráfica del Perceptrón")
+    
+    # Crear una figura para la visualización del perceptrón con estilo más parecido al diagrama de referencia
+    fig, ax = plt.subplots(figsize=(8, 10))
+    
+    # Configuración general
+    ax.axis('off')
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 12)
+    
+    # Definir ubicaciones para los componentes
+    box_width = 3
+    box_height = 1
+    margin = 0.5
+    
+    # Posiciones de cajas
+    x_center = 5
+    y_input1 = 10
+    y_input2 = 10
+    y_bias = 10
+    x_input1 = 2
+    x_input2 = 5
+    x_bias = 8
+    
+    y_summation = 7
+    y_activation = 4
+    y_output = 1
+    
+    # Dibujar cajas de entrada
+    input1_rect = plt.Rectangle((x_input1 - box_width/2, y_input1 - box_height/2), box_width, box_height, 
+                              fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(input1_rect)
+    ax.text(x_input1, y_input1, f"Entrada X₁", ha='center', va='center', fontsize=12)
+    
+    input2_rect = plt.Rectangle((x_input2 - box_width/2, y_input2 - box_height/2), box_width, box_height, 
+                              fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(input2_rect)
+    ax.text(x_input2, y_input2, f"Entrada X₂", ha='center', va='center', fontsize=12)
+    
+    bias_rect = plt.Rectangle((x_bias - box_width/2, y_bias - box_height/2), box_width, box_height, 
+                            fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(bias_rect)
+    ax.text(x_bias, y_bias, f"Umbral b", ha='center', va='center', fontsize=12)
+    
+    # Dibujar caja de sumatorio
+    sum_rect = plt.Rectangle((x_center - box_width/2, y_summation - box_height/2), box_width, box_height, 
+                           fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(sum_rect)
+    ax.text(x_center, y_summation + 0.2, " ", ha='center', va='center', fontsize=12)
+    formula = r"$\Sigma(w_ix_i) + b$"
+    ax.text(x_center, y_summation - 0.2, formula, ha='center', va='center', fontsize=10)
+    
+    # Dibujar caja de función de activación
+    act_rect = plt.Rectangle((x_center - box_width/2, y_activation - box_height/2), box_width, box_height, 
+                           fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(act_rect)
+    ax.text(x_center, y_activation + 0.2, "Función de", ha='center', va='center', fontsize=12)
+    ax.text(x_center, y_activation - 0.2, "Activación", ha='center', va='center', fontsize=12)
+    
+    # Dibujar caja de salida
+    out_rect = plt.Rectangle((x_center - box_width/2, y_output - box_height/2), box_width, box_height, 
+                           fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+    ax.add_patch(out_rect)
+    ax.text(x_center, y_output + 0.2, "Salida", ha='center', va='center', fontsize=12)
+    ax.text(x_center, y_output - 0.2, "(0 o 1)", ha='center', va='center', fontsize=12)
+    
+    # Conectar los componentes con flechas
+    arrow_props = dict(arrowstyle='->', linewidth=1.5, color='gray')
+    
+    # Conectar entradas al sumatorio
+    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
+               xytext=(x_input1, y_input1 + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    ax.text((x_center + x_input1)/2 - 0.5, (y_summation + y_input1)/2, f"w₁={perceptron.weights[0]:.2f}", 
+           fontsize=10, ha='center', va='center')
+    
+    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
+               xytext=(x_input2, y_input2 + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    ax.text((x_center + x_input2)/2, (y_summation + y_input2)/2, f"w₂={perceptron.weights[1]:.2f}", 
+           fontsize=10, ha='center', va='center')
+    
+    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
+               xytext=(x_bias, y_bias + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    ax.text((x_center + x_bias)/2 + 0.5, (y_summation + y_bias)/2, f"b={perceptron.bias:.2f}", 
+           fontsize=10, ha='center', va='center')
+    
+    # Conectar sumatorio a función de activación
+    ax.annotate("", xy=(x_center, y_activation - box_height/2 - margin/4), 
+               xytext=(x_center, y_summation + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    
+    # Conectar función de activación a salida
+    ax.annotate("", xy=(x_center, y_output - box_height/2 - margin/4), 
+               xytext=(x_center, y_activation + box_height/2 + margin/4),
+               arrowprops=arrow_props)
+    
+    # Añadir título con el modelo perceptrón
+    ax.set_title("Modelo del Perceptrón", fontsize=16, pad=20)
+    
+    # Mostrar la fórmula final del perceptrón debajo del diagrama
+    formula_text = f"y = 1 si ({perceptron.weights[0]:.2f}·x₁ + {perceptron.weights[1]:.2f}·x₂ + {perceptron.bias:.2f}) ≥ 0, sino 0"
+    fig.text(0.5, 0.05, formula_text, ha='center', fontsize=12, 
+            bbox=dict(facecolor='lightyellow', alpha=0.9, boxstyle='round,pad=0.5'))
+    
+    # Mostrar la figura en Streamlit
+    st.pyplot(fig)
 
 # Parameter configuration
 st.sidebar.subheader("Parámetros")
