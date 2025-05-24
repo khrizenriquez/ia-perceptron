@@ -17,6 +17,11 @@ DEFAULT_WEIGHT_VALUE = 0.0
 # Default initial bias value
 DEFAULT_BIAS_VALUE = 0.0
 
+# Stopping criterion for training
+# If True, training stops when all predictions are correct
+# If False, training stops when the error rate is 0 (equivalent, but calculated differently)
+STOP_ON_ALL_CORRECT = True
+
 # Minimum and maximum values for UI controls
 MIN_FEATURES = 1
 MAX_FEATURES = 5

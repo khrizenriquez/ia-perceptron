@@ -38,54 +38,6 @@ Este proyecto implementa un perceptrón simple para clasificación binaria, desa
    pip install -r requirements.txt
    ```
 
-## Ejecución
-
-### Aplicación web interactiva:
-
-```
-streamlit run app.py
-```
-
-### Ejecutar pruebas:
-
-```
-pytest
-```
-
-### Contenedor Podman:
-
-```
-podman build -t io-perceptron .
-podman run -d -p 8501:8501 --name io-perceptron io-perceptron
-```
-
-## Demo
-
-Una demostración del proyecto está disponible en YouTube: [<<<AQUÍ_URL_VIDEO>>>](<<<AQUÍ_URL_VIDEO>>>)
-
-La aplicación está disponible en línea a través de Streamlit Cloud: [https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/](https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/)
-
-## Entorno virtual (opcional)
-
-Si prefieres ejecutar la aplicación localmente sin contenedores:
-
-```bash
-# Crear entorno virtual
-python -m venv venv
-
-# Activar entorno virtual (Linux/Mac)
-source venv/bin/activate
-
-# Activar entorno virtual (Windows)
-venv\Scripts\activate
-
-# Instalar dependencias
-pip install -r requirements.txt
-
-# Ejecutar la aplicación
-streamlit run app.py
-```
-
 ## Ejecución con contenedores
 
 ### Forma sencilla (script de inicio)
@@ -147,6 +99,13 @@ ia-perceptron/
 ├── start-perceptron.sh          # Script para iniciar el contenedor
 └── README.md                    # Este archivo
 ```
+
+## Demo
+
+Una demostración del proyecto está disponible en YouTube: [<<<AQUÍ_URL_VIDEO>>>](<<<AQUÍ_URL_VIDEO>>>)
+
+La aplicación está disponible en línea a través de Streamlit Cloud: [https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/](https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/)
+
 
 ## Licencia
 
