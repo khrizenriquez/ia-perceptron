@@ -434,46 +434,49 @@ def show_training_results(perceptron, epochs, error_history):
     st.subheader("Visualización Gráfica del Perceptrón")
     
     # Create a figure for the perceptron visualization with a style similar to the reference diagram
-    fig, ax = plt.subplots(figsize=(8, 10))
+    fig, ax = plt.subplots(figsize=(max(8, 2 + n_features * 1.5), 10))
     
     # General configuration
     ax.axis('off')
-    ax.set_xlim(0, 10)
+    ax.set_xlim(0, max(10, 2 + n_features * 2))
     ax.set_ylim(0, 12)
     
     # Define locations for the components
-    box_width = 3
-    box_height = 1
+    box_width = 2.5
+    box_height = 0.8
     margin = 0.5
     
-    # Box positions
-    x_center = 5
-    y_input1 = 10
-    y_input2 = 10
+    # Calculate center and input positions based on number of features
+    x_center = max(10, 2 + n_features * 2) / 2
+    y_input = 10
     y_bias = 10
-    x_input1 = 2
-    x_input2 = 5
-    x_bias = 8
-    
     y_summation = 7
     y_activation = 4
     y_output = 1
     
-    # Draw input boxes
-    input1_rect = plt.Rectangle((x_input1 - box_width/2, y_input1 - box_height/2), box_width, box_height, 
-                               fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
-    ax.add_patch(input1_rect)
-    ax.text(x_input1, y_input1, f"Entrada X₁", ha='center', va='center', fontsize=12)
+    # Calculate input positions to distribute them evenly
+    if n_features == 1:
+        input_positions = [x_center]
+    else:
+        input_spacing = min(3, (max(10, 2 + n_features * 2) - 4) / (n_features + 1))
+        start_x = 2 + box_width/2
+        input_positions = [start_x + i * input_spacing for i in range(n_features)]
     
-    input2_rect = plt.Rectangle((x_input2 - box_width/2, y_input2 - box_height/2), box_width, box_height, 
-                               fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
-    ax.add_patch(input2_rect)
-    ax.text(x_input2, y_input2, f"Entrada X₂", ha='center', va='center', fontsize=12)
+    # Bias position (always at the right)
+    x_bias = max(10, 2 + n_features * 2) - 2
     
+    # Draw input boxes dynamically
+    for i, x_input in enumerate(input_positions):
+        input_rect = plt.Rectangle((x_input - box_width/2, y_input - box_height/2), box_width, box_height, 
+                                   fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
+        ax.add_patch(input_rect)
+        ax.text(x_input, y_input, f"Entrada X₍{i+1}₎", ha='center', va='center', fontsize=10)
+    
+    # Draw bias box
     bias_rect = plt.Rectangle((x_bias - box_width/2, y_bias - box_height/2), box_width, box_height, 
                              fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
     ax.add_patch(bias_rect)
-    ax.text(x_bias, y_bias, f"Umbral b", ha='center', va='center', fontsize=12)
+    ax.text(x_bias, y_bias, f"Umbral b", ha='center', va='center', fontsize=10)
     
     # Draw summation box
     sum_rect = plt.Rectangle((x_center - box_width/2, y_summation - box_height/2), box_width, box_height, 
@@ -487,37 +490,48 @@ def show_training_results(perceptron, epochs, error_history):
     act_rect = plt.Rectangle((x_center - box_width/2, y_activation - box_height/2), box_width, box_height, 
                            fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
     ax.add_patch(act_rect)
-    ax.text(x_center, y_activation + 0.2, "Función de", ha='center', va='center', fontsize=12)
-    ax.text(x_center, y_activation - 0.2, "Activación", ha='center', va='center', fontsize=12)
+    ax.text(x_center, y_activation + 0.2, "Función de", ha='center', va='center', fontsize=10)
+    ax.text(x_center, y_activation - 0.2, "Activación", ha='center', va='center', fontsize=10)
     
     # Draw output box
     out_rect = plt.Rectangle((x_center - box_width/2, y_output - box_height/2), box_width, box_height, 
                            fill=True, color='white', edgecolor='black', linewidth=1, alpha=0.9)
     ax.add_patch(out_rect)
-    ax.text(x_center, y_output + 0.2, "Salida", ha='center', va='center', fontsize=12)
-    ax.text(x_center, y_output - 0.2, "(0 o 1)", ha='center', va='center', fontsize=12)
+    ax.text(x_center, y_output + 0.2, "Salida", ha='center', va='center', fontsize=10)
+    ax.text(x_center, y_output - 0.2, "(0 o 1)", ha='center', va='center', fontsize=10)
     
     # Connect components with arrows
     arrow_props = dict(arrowstyle='->', linewidth=1.5, color='gray')
     
-    # Connect inputs to summation
-    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
-               xytext=(x_input1, y_input1 + box_height/2 + margin/4),
-               arrowprops=arrow_props)
-    ax.text((x_center + x_input1)/2 - 0.5, (y_summation + y_input1)/2, f"w₁={perceptron.weights[0]:.2f}", 
-           fontsize=10, ha='center', va='center')
+    # Connect inputs to summation dynamically
+    for i, x_input in enumerate(input_positions):
+        ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
+                   xytext=(x_input, y_input + box_height/2 + margin/4),
+                   arrowprops=arrow_props)
+        
+        # Position weight labels to avoid overlap
+        mid_x = (x_center + x_input) / 2
+        mid_y = (y_summation + y_input) / 2
+        
+        # Adjust label position based on input position relative to center
+        if x_input < x_center:
+            offset_x = -0.3
+        elif x_input > x_center:
+            offset_x = 0.3
+        else:
+            offset_x = 0
+            
+        ax.text(mid_x + offset_x, mid_y, f"w₍{i+1}₎={perceptron.weights[i]:.2f}", 
+               fontsize=9, ha='center', va='center',
+               bbox=dict(facecolor='white', alpha=0.8, boxstyle='round,pad=0.2'))
     
-    ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
-               xytext=(x_input2, y_input2 + box_height/2 + margin/4),
-               arrowprops=arrow_props)
-    ax.text((x_center + x_input2)/2, (y_summation + y_input2)/2, f"w₂={perceptron.weights[1]:.2f}", 
-           fontsize=10, ha='center', va='center')
-    
+    # Connect bias to summation
     ax.annotate("", xy=(x_center, y_summation - box_height/2 - margin/4), 
                xytext=(x_bias, y_bias + box_height/2 + margin/4),
                arrowprops=arrow_props)
-    ax.text((x_center + x_bias)/2 + 0.5, (y_summation + y_bias)/2, f"b={perceptron.bias:.2f}", 
-           fontsize=10, ha='center', va='center')
+    ax.text((x_center + x_bias)/2 + 0.3, (y_summation + y_bias)/2, f"b={perceptron.bias:.2f}", 
+           fontsize=9, ha='center', va='center',
+           bbox=dict(facecolor='white', alpha=0.8, boxstyle='round,pad=0.2'))
     
     # Connect summation to activation function
     ax.annotate("", xy=(x_center, y_activation - box_height/2 - margin/4), 
@@ -533,9 +547,20 @@ def show_training_results(perceptron, epochs, error_history):
     ax.set_title("Modelo del Perceptrón", fontsize=16, pad=20)
     
     # Show the final perceptron formula below the diagram
-    formula_text = f"y = 1 si ({perceptron.weights[0]:.2f}·x₁ + {perceptron.weights[1]:.2f}·x₂ + {perceptron.bias:.2f}) ≥ 0, sino 0"
-    fig.text(0.5, 0.05, formula_text, ha='center', fontsize=12, 
-            bbox=dict(facecolor='lightyellow', alpha=0.9, boxstyle='round,pad=0.5'))
+    formula_parts = []
+    for i in range(n_features):
+        if i == 0:
+            formula_parts.append(f"{perceptron.weights[i]:.2f}·x₍{i+1}₎")
+        else:
+            sign = "+" if perceptron.weights[i] >= 0 else "-"
+            formula_parts.append(f" {sign} {abs(perceptron.weights[i]):.2f}·x₍{i+1}₎")
+    
+    bias_sign = "+" if perceptron.bias >= 0 else "-"
+    formula_text = f"y = 1 si ({' '.join(formula_parts)} {bias_sign} {abs(perceptron.bias):.2f}) ≥ 0, sino 0"
+    
+    fig.text(0.5, 0.05, formula_text, ha='center', fontsize=10, 
+            bbox=dict(facecolor='lightyellow', alpha=0.9, boxstyle='round,pad=0.5'),
+            wrap=True)
     
     # Convert the matplotlib figure to an image for HTML embedding with responsive class
     buffer = io.BytesIO()
