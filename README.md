@@ -102,7 +102,7 @@ ia-perceptron/
 
 ## Demo
 
-Una demostración del proyecto está disponible en YouTube: [<<<AQUÍ_URL_VIDEO>>>](<<<AQUÍ_URL_VIDEO>>>)
+Una demostración del proyecto está disponible en YouTube: [¡Encendiendo una bombilla con un perceptrón! ¿Cómo funciona?](https://youtu.be/C8PZXlwBjjg)
 
 La aplicación está disponible en línea a través de Streamlit Cloud: [https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/](https://ia-perceptron-gmf6yadczjwzyu3cspvljw.streamlit.app/)
 
