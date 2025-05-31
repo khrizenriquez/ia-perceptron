@@ -1,4 +1,4 @@
-# Perceptrón Simple - Proyecto de IA 2025
+# Perceptrón Simple
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/khrizenriquez/ia-perceptron)
 
